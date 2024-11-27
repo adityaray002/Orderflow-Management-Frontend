@@ -1,0 +1,162 @@
+﻿@using OrderFlowManagementFrontend.Data
+@using MudBlazor
+@inject MudBlazor.IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject AllOrder allOrder
+<div class="main-container">
+    @if (@flag == 0)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Filled" Style="margin-bottom:15px; justify-content: center;">Message Cannot be Blank</MudAlert>
+        
+    }
+   
+    <div class="d-flex">
+        <div class="read" style="width:40%; margin-right:5%; margin-left:5%;">
+            <div> <MudTextField Value="@Orders.username" Label="UserName" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            <div style="margin-top:3%;"> <MudTextField  Value="@Orders.email" Label="Email Id" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            <div style="margin-top:3%;"> <MudTextField  Value="@Orders.phoneno" Label="Phone Number" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            <div style="margin-top:3%;"><MudTextField  Value="@Orders.dateTime" Label="Order Date" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            <div style="margin-top:3%;"> <MudTextField  Value="@Orders.electronicItem" Label="Electronic Item" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            <div style="margin-top:3%;"> <MudTextField  Value="@Orders.address" Label="Address" ReadOnly="true" Variant="Variant.Outlined" /></div>
+            
+           
+           
+       
+        </div>
+        <div class="update" style="width:40%;">
+
+            <InputTextArea @bind-Value="message"  HelperText="Some helping Text" Variant="Variant.Outlined" Style="width:100%; height:45vh; border-color:black; border-style:solid;border-width: 2px;   border-radius: 4px; padding:10px; margin-top:2%;" />
+
+            <MudSelect @bind-Value="selectedStatus" Label="Status" Variant="Variant.Outlined" style="margin-top:5%;">
+
+                @foreach (var s in status)
+                {
+                    <MudSelectItem Value="@s">
+                        <p>@s</p>
+                    </MudSelectItem>
+                }
+
+            </MudSelect>
+
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end" style="margin-top:2%;">
+        <div style="margin-right:30px;"><MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Secondary" Style="background-color:#989898;" OnClick="CancelDialog">Cancel</MudButton></div>
+        <div style="margin-right:10%;" >
+            
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Secondary" Style="background-color:#85ea2d; color:black" OnClick="OnValidSubmit">Save</MudButton>
+            
+           
+            
+           
+        </div>
+    </div>
+</div>
+@code {
+    [CascadingParameter] MudBlazor.MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public AllOrders Orders { get; set; } = new AllOrders();
+
+    HttpClient httpClient = new HttpClient();
+
+    public string message { get; set; } 
+
+    public int statusId { get; set; }
+    public string selectedStatus { get; set; } 
+    int flag = 1;
+    public Dialog()
+    {
+    }
+    List<string> status = new List<string> ( );
+    public Order order = new Order();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            selectedStatus = Orders.statusName;
+            var statusListResponse = await httpClient.GetFromJsonAsync<StatusResponse>("https://localhost:7122/GetAllStatus");
+            status = statusListResponse.value.Select(s => s.name).ToList();
+
+            var orderListResponse = await httpClient.GetFromJsonAsync<OrderResponse>($"https://localhost:7122/order/{Orders.id}");
+            order = orderListResponse.value;
+            message = order.MessageInfo;
+            await base.OnInitializedAsync();
+        }
+        catch (Exception e)
+        {
+
+        }
+
+    }
+
+
+
+    private async Task OnValidSubmit()
+    {
+
+        try
+        {
+
+            int statusIndex = status.IndexOf(selectedStatus);
+            if (statusIndex == -1)
+            {
+                Console.WriteLine("Invalid status selected.");
+                return;
+            }
+
+
+            order.MessageInfo = message;
+            order.StatusId = statusIndex + 1;
+
+            if (order.MessageInfo.Length == 0)
+            {
+                flag = 0;
+                StateHasChanged();
+
+                Console.WriteLine("sgfu");
+            }
+            else
+            {
+                var response = await httpClient.PutAsJsonAsync("https://localhost:7122/updateOrder", order);
+                flag = 1;
+
+            }
+
+            if (flag==1)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                flag = 0;
+                NavigationManager.NavigateTo("/allorders", true);
+
+            }
+            else
+            {
+                Console.WriteLine($"Failed to update order. ");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during save: {ex.Message}");
+        }
+        if (flag == 1)
+        {
+            StateHasChanged();
+            flag = 0;
+            NavigationManager.NavigateTo("/allorders", true);
+            
+            CancelDialog();
+        }
+        
+       
+    }
+    public void CancelDialog()
+    {
+        MudDialog.Cancel();
+    }
+
+
+}
+

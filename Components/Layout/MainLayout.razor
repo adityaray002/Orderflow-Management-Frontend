@@ -1,0 +1,45 @@
+﻿ @inherits LayoutComponentBase
+
+ <div class="page">
+    @*   <div class="sidebar">
+          <NavMenu />
+      </div> *@
+
+     <main>
+         @* <div class="top-row px-4">
+             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+         </div> *@
+        <MudAppBar style=" background-color:#1b1b1b;" Fixed="false">
+            <h4 style="margin-top:0.8%;">Order Flow Management</h4>
+            <MudSpacer />
+          
+            <a href="/">  <MudButton Variant="Variant.Filled" Style="margin-right:50px;  background-color:#85ea2d;"><MudIcon Icon="material-symbols-outlined/home" Color="Color.Dark" Style="margin-right:8px;" />Home</MudButton></a>
+            <a href="/allorders"><MudButton Color="Color.Info" Variant="Variant.Filled" Style="margin-right:50px;background-color:#85ea2d; color:black;">Admin</MudButton></a>
+        </MudAppBar>
+       @*  <MudAppBar Color="Color.Primary" Fixed="false">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+        </MudAppBar> *@
+         <article class="content px-4">
+             @Body
+         </article>
+     </main>
+ </div>
+ 
+ <div id="blazor-error-ui">
+     An unhandled error has occurred.
+     <a href="" class="reload">Reload</a>
+     <a class="dismiss">🗙</a>
+ </div>
+
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
