@@ -3,21 +3,15 @@
 @using System.ComponentModel.DataAnnotations
 @using MudBlazor
 @using OrderFlowManagementFrontend.Data;
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject ElectronicResponse electronicsListResponse;
 @inject NavigationManager Navigation
 <div class="form-wrapper d-flex align-items-center justify-content-center">
     <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
         <DataAnnotationsValidator />
         <div>
-            @if (flag1 == true)
+            @if (flag == true)
             {
-                <MudAlert Severity="Severity.Error" Variant="Variant.Filled">@messageResponse</MudAlert>
-            }
-
-            @if (flag2 == true)
-            {
-                <MudAlert Severity="Severity.Success" Variant="Variant.Filled">@messageResponse</MudAlert>
+                <MudAlert Severity="Severity.Success" Variant="Variant.Filled">Order successful</MudAlert>
             }
 
             <MudItem xs="12" sm="7">
@@ -37,7 +31,16 @@
                         <MudTextField Label="Phone Number" Class="mt-3" HelperText="Max. 10 Digit"
                                       @bind-Value="model.phoneNo" For="@(() => model.phoneNo)" />
 
-                      
+                        <MudSelect @bind-Value="selectedElectronics" Label="Electronic Items" Variant="Variant.Outlined" style="margin-top:9%">
+
+                            @foreach (var e in electronic)
+                            {
+                                <MudSelectItem Value="@e">
+                                    <p>@e</p>
+                                </MudSelectItem>
+                            }
+
+                        </MudSelect>
 
 
 
@@ -48,16 +51,16 @@
 
 
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="background-color:#85ea2d; color:black">Register</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="background-color:#85ea2d; color:black">Order Now</MudButton>
                     </MudCardActions>
 
 
                 </MudCard>
             </MudItem>
 
-            <MudItem xs="12" Style="margin-top:20px;">
+            <MudItem xs="12">
                 <MudText Typo="Typo.body2" Align="Align.Center">
-                    Already Registered? <a href="/login" style="color:blue;">SignIn here</a>
+                    Fill out the form correctly to see the success message.
                 </MudText>
             </MudItem>
         </div>
@@ -70,11 +73,10 @@
 @code {
     List<string> electronic = new List<string>{"select"};
     string selectedElectronics = "select";
-    string messageResponse = "skjdf";
+
     Registration model = new Registration();
     bool success;
-    bool flag1 = false;
-    bool flag2 = false;
+    bool flag = false;
 
     public HttpClient httpClient = new HttpClient();
 
@@ -82,8 +84,8 @@
     {
         try
         {
-           
-            ClearValue();
+            electronicsListResponse = await httpClient.GetFromJsonAsync<ElectronicResponse>("https://localhost:7122/getAllElectronics");
+            electronic = electronicsListResponse.value.Select(e => e.name).ToList();
             base.OnInitializedAsync();
         }
         catch (Exception e)
@@ -103,27 +105,33 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
-                messageResponse = "Registration successful";
-            //    await  LocalStorage.SetItemAsync("UserId" ,result.id);
+                DateTime now = DateTime.Now;
+                var eIndex = electronic.IndexOf(selectedElectronics);
+                var eId = 0;
+                if (eIndex >= 0)
+                {
+                    eId = electronicsListResponse.value[eIndex].id;
+                }
+                var order = new Order
+                    {
+                        UserInfoId = result.id,
+                        ElectronicId = eId,
+                        StatusId = 1,
+                        MessageInfo = "Your Order Message Here",
+                        OrderDate = now
+                    };
 
-                flag2 = !flag2;
-                StateHasChanged();
-                await Task.Delay(3000);
-                Navigation.NavigateTo("/login");
+                var orderResponse = await httpClient.PostAsJsonAsync("https://localhost:7122/order", order);
 
             }
-            else
-            {
-                messageResponse = "User Already Exist";
-                flag1 = !flag1;
-                StateHasChanged();
-                await Task.Delay(3000);
-                flag1 = !flag1;
-                StateHasChanged();
-            }
 
+          //  var user = await httpClient.GetFromJsonAsync<RegistrationResponse>($"https://localhost:7122/GetUserByEmail/{model.Email}");
             
        
+                flag = !flag;
+            StateHasChanged();
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/allorders");
             
         }
         catch (Exception ex)
@@ -134,10 +142,5 @@
         StateHasChanged();
     }
 
-    private async Task ClearValue()
-    {
-        // Remove the stored value
-        await LocalStorage.RemoveItemAsync("savedInput");
-      //  savedValue = "No value saved yet!";
-    }
+
 }
