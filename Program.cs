@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using OrderFlowManagementFrontend.Data;
 using FluentAssertions.Common;
 using OrderFlowManagementFrontend.Components.Pages;
+using Blazored.LocalStorage;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,11 +15,17 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddMudServices();
 builder.Services.AddScoped<Registration>();
+builder.Services.AddScoped<UserSignin>();
+builder.Services.AddScoped<AdminSignin>();
+builder.Services.AddScoped<AdminSignup>();
 builder.Services.AddScoped<ElectronicResponse>();
 builder.Services.AddScoped<RegistrationResponse>();
 builder.Services.AddScoped<AllOrders>();
 builder.Services.AddScoped<AllOrder>();
 builder.Services.AddScoped<AllOrderResponse>();
+builder.Services.AddScoped<ProductsResponse>();
+builder.Services.AddBlazoredLocalStorage();
+
 
 
 

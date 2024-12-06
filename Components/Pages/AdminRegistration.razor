@@ -1,13 +1,11 @@
-﻿
- @page "/"
-@using System.ComponentModel.DataAnnotations
-@using MudBlazor
+﻿@page "/adminRegistration"
 @using OrderFlowManagementFrontend.Data;
+@using System.ComponentModel.DataAnnotations
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
-@inject ElectronicResponse electronicsListResponse;
+@using MudBlazor
 @inject NavigationManager Navigation
 <div class="form-wrapper d-flex align-items-center justify-content-center">
-    <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <EditForm Model="@adminSignup" OnValidSubmit="OnValidSubmit">
         <DataAnnotationsValidator />
         <div>
             @if (flag1 == true)
@@ -24,20 +22,20 @@
                 <MudCard Style="width:25vw;">
                     <MudCardContent>
                         <MudTextField Label="Name"
-                                      @bind-Value="model.name" For="@(() => model.name)" />
+                                      @bind-Value="adminSignup.Name" For="@(() => adminSignup.Name)" />
                         <MudTextField Label="Password" Class="mt-3"
-                                      @bind-Value="model.password" For="@(() => model.password)" />
+                                      @bind-Value="adminSignup.Password" For="@(() => adminSignup.Password)" />
                         <MudTextField Label="Email" Class="mt-3"
-                                      @bind-Value="model.email" For="@(() => model.email)" />
+                                      @bind-Value="adminSignup.Email" For="@(() => adminSignup.Email)" />
 
                         <MudTextField Label="Address" Class="mt-3"
-                                      @bind-Value="model.address" For="@(() => model.address)" />
+                                      @bind-Value="adminSignup.Address" For="@(() => adminSignup.Address)" />
 
 
                         <MudTextField Label="Phone Number" Class="mt-3" HelperText="Max. 10 Digit"
-                                      @bind-Value="model.phoneNo" For="@(() => model.phoneNo)" />
+                                      @bind-Value="adminSignup.PhoneNo" For="@(() => adminSignup.PhoneNo)" />
 
-                      
+
 
 
 
@@ -48,7 +46,7 @@
 
 
                     <MudCardActions>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="background-color:#85ea2d; color:black">Register</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Style="background-color:#FCA130; color:black">Register</MudButton>
                     </MudCardActions>
 
 
@@ -57,7 +55,7 @@
 
             <MudItem xs="12" Style="margin-top:20px;">
                 <MudText Typo="Typo.body2" Align="Align.Center">
-                    Already Registered? <a href="/login" style="color:blue;">SignIn here</a>
+                    Already Registered? <a href="/adminlogin" style="color:blue;">SignIn here</a>
                 </MudText>
             </MudItem>
         </div>
@@ -66,50 +64,28 @@
 </div>
 
 
-
 @code {
-    List<string> electronic = new List<string>{"select"};
-    string selectedElectronics = "select";
-    string messageResponse = "skjdf";
-    Registration model = new Registration();
-    bool success;
+    AdminSignup adminSignup = new AdminSignup();
     bool flag1 = false;
     bool flag2 = false;
-
-    public HttpClient httpClient = new HttpClient();
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-           
-            ClearValue();
-            base.OnInitializedAsync();
-        }
-        catch (Exception e)
-        {
-
-        }
-
-    }
-
-
+    string messageResponse = "skjdf";
+    HttpClient httpClient = new HttpClient();
     private async Task OnValidSubmit(EditContext context)
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync("https://localhost:7122/addUser", model);
+            var response = await httpClient.PostAsJsonAsync("https://localhost:7122/addAdmin", adminSignup);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
                 messageResponse = "Registration successful";
-            //    await  LocalStorage.SetItemAsync("UserId" ,result.id);
+            //    await LocalStorage.SetItemAsync("AdminId", result.id);
 
                 flag2 = !flag2;
                 StateHasChanged();
-                await Task.Delay(3000);
-                Navigation.NavigateTo("/login");
+               await Task.Delay(3000);
+               Navigation.NavigateTo("/adminlogin");
 
             }
             else
@@ -122,9 +98,9 @@
                 StateHasChanged();
             }
 
-            
-       
-            
+
+
+
         }
         catch (Exception ex)
         {
@@ -134,10 +110,4 @@
         StateHasChanged();
     }
 
-    private async Task ClearValue()
-    {
-        // Remove the stored value
-        await LocalStorage.RemoveItemAsync("savedInput");
-      //  savedValue = "No value saved yet!";
-    }
 }
