@@ -75,7 +75,7 @@
                 var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
                 messageResponse = "Login successful";
                 await LocalStorage.SetItemAsync("AdminId", result.id);
-
+                await LocalStorage.SetItemAsync("JwtTokenAdmin", result.token);
                 flag2 = !flag2;
                 StateHasChanged();
                 await Task.Delay(3000);

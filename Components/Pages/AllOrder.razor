@@ -3,6 +3,7 @@
 @using MudBlazor
 @using OrderFlowManagementFrontend.Data
 @inject AllOrderResponse allOrderResponse
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject IDialogService Dialog
 @inject NavigationManager NavigationManager
 <MudTable Items="@allOrders" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<AllOrders,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
@@ -80,6 +81,8 @@
     {
         try
         {
+            var jwtTokenAdmin = await LocalStorage.GetItemAsync<string>("JwtTokenAdmin");
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtTokenAdmin);
             var allOrderResponse = await httpClient.GetFromJsonAsync<AllOrderResponse>("https://localhost:7122/allorder");
 
             if (allOrderResponse?.value != null)

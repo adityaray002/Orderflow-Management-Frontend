@@ -50,6 +50,8 @@
     {
         try
         {
+            var jwtToken = await LocalStorage.GetItemAsync<string>("JwtToken");
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwtToken);
             var response = await httpClient.GetFromJsonAsync<ProductsResponse>("https://localhost:7122/getAllProducts");
             if (response.value != null)
             {

@@ -4,6 +4,7 @@ namespace OrderFlowManagementFrontend.Data
 {
     public class Registration
     {
+        public string token { get; set; }
         public int id { get; set; }
         [Required]
         public string name { get; set; }

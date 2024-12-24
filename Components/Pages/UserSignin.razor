@@ -1,5 +1,4 @@
-﻿
- @page "/login"
+﻿ @page "/login"
 @using System.ComponentModel.DataAnnotations
 @using MudBlazor
 @using OrderFlowManagementFrontend.Data;
@@ -24,8 +23,8 @@
             <MudItem xs="12" sm="7">
                 <MudCard Style="width:25vw;">
                     <MudCardContent>
-                       
-                       
+
+
                         <MudTextField Label="Email" Class="mt-3"
                                       @bind-Value="login.email" For="@(() => login.email)" />
 
@@ -52,7 +51,7 @@
 
             <MudItem xs="12" Style="margin-top:20px;">
                 <MudText Typo="Typo.body2" Align="Align.Center">
-                   Not a Registered User <a href="/" style="color:blue">Sign up here!</a>
+                    Not a Registered User <a href="/" style="color:blue">Sign up here!</a>
                 </MudText>
             </MudItem>
         </div>
@@ -77,6 +76,7 @@
                 var result = await response.Content.ReadFromJsonAsync<RegistrationResponse>();
                 messageResponse = "Login successful";
                 await LocalStorage.SetItemAsync("UserId", result.id);
+                await LocalStorage.SetItemAsync("JwtToken", result.token);
 
                 flag2 = !flag2;
                 StateHasChanged();
